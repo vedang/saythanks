@@ -10,8 +10,13 @@
 
 (def settings-map {:access-token "AAACEdEose0cBAP6GITp2UDBjds6kj9hQDCg1gHFKwQ9lzgtH5Cdyov3jnEJY13LZAcy477iSzzLk74O3VIqNhmxgc0lazCtAQNGthxAZDZD"
                    :happy-birthday-regex #"(?i)h?a+p+y(?:\s|.)*b?(?:irth|'| )?d+ay"
-                   ;; name will go where the %s is
-                   :thank-you-msg "Thank you so much, %s! :-)"
+
+                   ;; Add as many messages as you want here, one will be
+                   ;; picked at random. remember to add a %s where you
+                   ;; want the name to go. this is not optional.
+                   :thank-you-msgs ["Thank you so much, %s! :-)"
+                                    "Thanks, %s! I had a blast!"
+                                    "Thank you for the wishes, %s :-)"]
                    :facebook-graph-api-url "https://graph.facebook.com/"
                    :redis-server {:host "127.0.0.1" :port 6379}})
 
@@ -26,6 +31,7 @@
 ;; Start reading at -main. The following two are the important functions
 (declare poll-for-posts! say-thank-you poll-poll-poll)
 (def birthday-since-key "birthday.since")
+(def msg-count (count (:thank-you-msgs settings-map)))
 
 
 (defn -main
@@ -60,7 +66,7 @@
   [post]
   (let [thankee (:from post)
         access-token (:access-token settings-map)
-        thankyou-str (format (:thank-you-msg settings-map)
+        thankyou-str (format ((:thank-you-msgs settings-map) (rand-int msg-count))
                              (first (clojure.string/split (:name thankee)
                                                           #" ")))
         thanks-post-url (str (:facebook-graph-api-url settings-map)
