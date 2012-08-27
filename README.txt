@@ -1,15 +1,17 @@
-# saythanks
+;; -*- mode: org; -*-
+
+* saythanks
 
 A Clojure library designed to thank people who wish you on Facebook on
 your birthday.
 
-## Pre-requisites
+** Pre-requisites
 
 You need to install Redis in order to use this code. We need Redis to
 store the point to which we've replied to posts. This allows us keep
 continuously polling Facebook and reply to everyone who wishes us.
 
-## Usage
+** Usage
 
 1. Create the file src/saythankyou/access.clj
 
@@ -35,7 +37,7 @@ facebook post.
 
 Enjoy :)
 
-## License
+** License
 
 Copyright © 2012 Vedang Manerikar
 
