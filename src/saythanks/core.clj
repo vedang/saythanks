@@ -8,7 +8,7 @@
   (:import [org.joda.time DateTime]))
 
 
-(def settings-map {:access-token "AAACEdEose0cBAAZCaKVMuf0vfKdKxq32Fbl274XNSbGQ1PIDvZAiPj0t9m46mSZBifR7gOPJNMXL4WMGPC8i4iC2SJh4kDUwxIoNwsLvQZDZD"
+(def settings-map {:access-token "AAACEdEose0cBAP6GITp2UDBjds6kj9hQDCg1gHFKwQ9lzgtH5Cdyov3jnEJY13LZAcy477iSzzLk74O3VIqNhmxgc0lazCtAQNGthxAZDZD"
                    :happy-birthday-regex #"[Hh]appy.*"
                    ;; name will go where the %s is
                    :thank-you-msg "Thank you so much, %s! :-)"
@@ -59,10 +59,24 @@
   Like their post if it's bigger than 5 words :-D"
   [post]
   (let [thankee (:from post)
+        access-token (:access-token settings-map)
         thankyou-str (format (:thank-you-msg settings-map)
                              (first (clojure.string/split (:name thankee)
-                                                          #" ")))]
-    (println thankyou-str)))
+                                                          #" ")))
+        thanks-post-url (str (:facebook-graph-api-url settings-map)
+                             (:id post)
+                             "/comments?"
+                             (http/generate-query-string
+                              {:access_token access-token
+                               :message thankyou-str}))
+        thanks-like-url (str (:facebook-graph-api-url settings-map)
+                             (:id post)
+                             "/likes?"
+                             (http/generate-query-string
+                              {:access_token access-token}))]
+    (println thankyou-str)
+    (http/post thanks-post-url)
+    (http/post thanks-like-url)))
 
 
 (defn birthday-matcher
