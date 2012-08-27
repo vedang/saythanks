@@ -2,18 +2,18 @@
   (:gen-class)
   (:require [clj-http.client :as http]
             [clj-time.core :as time]
-            [clojure.data.json :as json])
+            [clojure.data.json :as json]
+            [carmine.core :as r])
+  (:use [saythanks.redis :only [init-redis! redis]])
   (:import [org.joda.time DateTime]))
 
 
-(def settings-map {;; your access token goes here. replace the nil with a
-                   ;; string
-                   ;; example: "asdskjdgkhg"
-                   :access-token "AAACEdEose0cBAAZCaKVMuf0vfKdKxq32Fbl274XNSbGQ1PIDvZAiPj0t9m46mSZBifR7gOPJNMXL4WMGPC8i4iC2SJh4kDUwxIoNwsLvQZDZD"
+(def settings-map {:access-token "AAACEdEose0cBAAZCaKVMuf0vfKdKxq32Fbl274XNSbGQ1PIDvZAiPj0t9m46mSZBifR7gOPJNMXL4WMGPC8i4iC2SJh4kDUwxIoNwsLvQZDZD"
                    :happy-birthday-regex #"[Hh]appy.*"
                    ;; name will go where the %s is
                    :thank-you-msg "Thank you so much, %s! :-)"
-                   :facebook-graph-api-url "https://graph.facebook.com/"})
+                   :facebook-graph-api-url "https://graph.facebook.com/"
+                   :redis-server {:host "127.0.0.1" :port 6379}})
 
 
 (defn datetime->unix-timestamp
@@ -23,11 +23,9 @@
      (str (long (/ (.getMillis datetime) 1000)))))
 
 
-(def ^:dynamic *since* (datetime->unix-timestamp (time/from-now (time/days -1))))
-
-
 ;; Start reading at -main. The following two are the important functions
 (declare poll-for-posts! say-thank-you poll-poll-poll)
+(def birthday-since-key "birthday.since")
 
 
 (defn -main
@@ -35,7 +33,8 @@
   []
   (println "Start polling facebook for relevant posts")
   (if (:access-token settings-map)
-    (while true (poll-poll-poll))
+    (do (init-redis! (:redis-server settings-map))
+        (while true (poll-poll-poll)))
     (println "You've forgotten to set your access-token in the code.")))
 
 
@@ -52,7 +51,7 @@
   (when paging-url
     (when-let [token (first (re-seq #"since=[0-9]+" paging-url))]
       (let [new-since (second (clojure.string/split token #"="))]
-        (alter-var-root #'*since* (constantly new-since))))))
+        (redis (r/set birthday-since-key new-since))))))
 
 
 (defn thank-you-person
@@ -78,8 +77,10 @@
   them again."
   []
   (let [access-token (:access-token settings-map)
+        since (or (redis (r/get birthday-since-key))
+                  (datetime->unix-timestamp (time/from-now (time/days -1))))
         url-args {:access_token access-token
-                  :since *since*
+                  :since since
                   :limit 1000}
         feed-url (str (:facebook-graph-api-url settings-map)
                       "me/feed?"
@@ -89,7 +90,7 @@
                                    (:body feed-res)
                                    "{}"))
         feed-data (:data feed-res)]
-    (println "Fetched posts since : " *since*)
+    (println "Fetched posts since : " since)
     (update-since-token (get-in feed-res [:paging :previous]))
     (println "Data count = " (count feed-data))
     feed-data))

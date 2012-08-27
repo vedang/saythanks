@@ -7,6 +7,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [clj-http "0.4.3"]
                  [clj-time "0.4.3"]
+                 [carmine "0.8.2-SNAPSHOT"]
                  [org.clojure/data.json "0.1.3" :exclusions [org.clojure/clojure]]]
   :min-lein-version "2.0.0"
   :warn-on-reflection true
