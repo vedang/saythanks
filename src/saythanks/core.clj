@@ -26,8 +26,10 @@
                      "Thank you for the wishes, %s :-)"])
 
 
-;; Start reading at -main. The following two are the important functions
+;; Start reading at -main. The following are the important functions
 (declare poll-for-posts! say-thank-you poll-poll-poll)
+
+
 (def birthday-since-key "birthday.since")
 (def msg-count (count thank-you-msgs))
 (def facebook-graph-api-url "https://graph.facebook.com/")
