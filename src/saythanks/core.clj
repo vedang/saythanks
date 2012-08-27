@@ -27,25 +27,50 @@
 
 
 ;; Start reading at -main. The following two are the important functions
-(declare poll-for-posts! say-thank-you)
+(declare poll-for-posts! say-thank-you poll-poll-poll)
 
 
 (defn -main
   "Poll FB for new posts on your wall. Thank kind folk."
-  [& args]
+  []
   (println "Start polling facebook for relevant posts")
   (if (:access-token settings-map)
-    (-> (poll-for-posts!)
-        (say-thank-you))
+    (while true (poll-poll-poll))
     (println "You've forgotten to set your access-token in the code.")))
+
+
+(defn poll-poll-poll
+  "Keep the poor fellow polling."
+  []
+  (say-thank-you (poll-for-posts!))
+  (Thread/sleep 5000))
 
 
 (defn update-since-token
   "Update the since token from given url"
   [paging-url]
-  (when-let [token (first (re-seq #"since=[0-9]+" paging-url))]
-    (let [new-since (second (clojure.string/split token #"="))]
-      (alter-var-root #'*since* (constantly new-since)))))
+  (when paging-url
+    (when-let [token (first (re-seq #"since=[0-9]+" paging-url))]
+      (let [new-since (second (clojure.string/split token #"="))]
+        (alter-var-root #'*since* (constantly new-since))))))
+
+
+(defn thank-you-person
+  "Thank the person individually.
+  Like their post if it's bigger than 5 words :-D"
+  [post]
+  (let [thankee (:from post)
+        thankyou-str (format (:thank-you-msg settings-map)
+                             (first (clojure.string/split (:name thankee)
+                                                          #" ")))]
+    (println thankyou-str)))
+
+
+(defn birthday-matcher
+  [post]
+  (when (:message post)
+    (re-seq (:happy-birthday-regex settings-map)
+            (:message post))))
 
 
 (defn poll-for-posts!
@@ -68,24 +93,6 @@
     (update-since-token (get-in feed-res [:paging :previous]))
     (println "Data count = " (count feed-data))
     feed-data))
-
-
-(defn thank-you-person
-  "Thank the person individually.
-  Like their post if it's bigger than 5 words :-D"
-  [post]
-  (let [thankee (:from post)
-        thankyou-str (format (:thank-you-msg settings-map)
-                             (first (clojure.string/split (:name thankee)
-                                                          #" ")))]
-    (println thankyou-str)))
-
-
-(defn birthday-matcher
-  [post]
-  (when (:message post)
-    (re-seq (:happy-birthday-regex settings-map)
-            (:message post))))
 
 
 (defn say-thank-you
