@@ -9,7 +9,7 @@
 
 
 (def settings-map {:access-token "AAACEdEose0cBAP6GITp2UDBjds6kj9hQDCg1gHFKwQ9lzgtH5Cdyov3jnEJY13LZAcy477iSzzLk74O3VIqNhmxgc0lazCtAQNGthxAZDZD"
-                   :happy-birthday-regex #"[Hh]appy.*"
+                   :happy-birthday-regex #"(?i)h?a+p+y(?:\s|.)*b?(?:irth|'| )?d+ay"
                    ;; name will go where the %s is
                    :thank-you-msg "Thank you so much, %s! :-)"
                    :facebook-graph-api-url "https://graph.facebook.com/"
@@ -42,7 +42,7 @@
   "Keep the poor fellow polling."
   []
   (say-thank-you (poll-for-posts!))
-  (Thread/sleep 5000))
+  (Thread/sleep 60000))
 
 
 (defn update-since-token
