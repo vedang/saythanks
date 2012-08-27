@@ -48,7 +48,7 @@
   "Keep the poor fellow polling."
   []
   (say-thank-you (poll-for-posts!))
-  (Thread/sleep 60000))
+  (Thread/sleep (+ (rand-int (- 300000 30000)) 30000)))
 
 
 (defn update-since-token
