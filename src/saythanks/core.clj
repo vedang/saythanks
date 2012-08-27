@@ -4,14 +4,18 @@
             [clj-time.core :as time]
             [clojure.data.json :as json]
             [carmine.core :as r])
-  (:use [saythanks.redis :only [init-redis! redis]])
+  (:use [saythanks.redis :only [init-redis! redis]]
+        [saythanks.access :only [access-token]])
   (:import [org.joda.time DateTime]))
 
 
+;; IMP: create the file src/saythanks/access.clj
+;; and add the following to it
+;; (ns saythanks.access)
+;; (def access-token "<your access token>")
 ;; Add your access token here.
 ;; Get it from https://developers.facebook.com/tools/explorer
 ;; you need to give the read_stream and publish_stream permissions
-(def access-token "AAACEdEose0cBAP6GITp2UDBjds6kj9hQDCg1gHFKwQ9lzgtH5Cdyov3jnEJY13LZAcy477iSzzLk74O3VIqNhmxgc0lazCtAQNGthxAZDZD")
 
 
 ;; Add as many messages as you want here, one will be
