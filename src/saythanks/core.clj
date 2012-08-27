@@ -43,15 +43,16 @@
   (println "Start polling facebook for relevant posts")
   (if access-token
     (do (init-redis! redis-server)
-        (while true (poll-poll-poll)))
+        (poll-poll-poll))
     (println "You've forgotten to set your access-token in the code.")))
 
 
 (defn poll-poll-poll
   "Keep the poor fellow polling."
   []
-  (say-thank-you (poll-for-posts!))
-  (Thread/sleep (+ (rand-int (- 300000 30000)) 30000)))
+  (while true
+    (say-thank-you (poll-for-posts!))
+    (Thread/sleep (+ (rand-int (- 300000 30000)) 30000))))
 
 
 (defn datetime->unix-timestamp
