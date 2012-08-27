@@ -15,8 +15,8 @@ continuously polling Facebook and reply to everyone who wishes us.
 
 Add the following code to it:
 
-(ns saythanks.access)
-(def access-token "<your access token>")
+    (ns saythanks.access)
+    (def access-token "<your access token>")
 
 Add your access token here.
 Get it from https://developers.facebook.com/tools/explorer
@@ -30,8 +30,8 @@ facebook post.
 
 3. Go to the terminal and run:
 
-$ lein uberjar
-$ java -jar ./target/saythanks-0.1.0-SNAPSHOT-standalone.jar
+    $ lein uberjar
+    $ java -jar ./target/saythanks-0.1.0-SNAPSHOT-standalone.jar
 
 Enjoy :)
 
