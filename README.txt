@@ -37,7 +37,16 @@ facebook post.
 
 Enjoy :)
 
-** License
+** Contribution
+
+Suggestions and pull requests are most welcome.
+
+* Author - Vedang Manerikar
+
+* Contributors
+ - Kiran Kulkarni: the awesome regex which is at the heart of the code.
+
+* License
 
 Copyright © 2012 Vedang Manerikar
 

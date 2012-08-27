@@ -34,6 +34,7 @@
 (def msg-count (count thank-you-msgs))
 (def facebook-graph-api-url "https://graph.facebook.com/")
 (def redis-server {:host "127.0.0.1" :port 6379})
+;; Regex contributed by Kiran Kulkarni (@kirankulkarni)
 (def happy-birthday-regex #"(?i)h?a+p+y(?:\s|.)*b?(?:irth|'| )?d+ay")
 
 
