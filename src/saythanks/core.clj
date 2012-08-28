@@ -52,8 +52,10 @@
   "Keep the poor fellow polling."
   []
   (while true
-    (say-thank-you (poll-for-posts!))
-    (Thread/sleep (+ (rand-int (- 300000 30000)) 30000))))
+    (let [timeout (+ (rand-int (- 300000 30000)) 30000)]
+      (say-thank-you (poll-for-posts!))
+      (println "Sleeping for " timeout " seconds.")
+      (Thread/sleep timeout))))
 
 
 (defn datetime->unix-timestamp
