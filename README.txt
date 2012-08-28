@@ -42,6 +42,15 @@ Enjoy :)
 
 Suggestions and pull requests are most welcome.
 
+Here are some TODO's I have in mind:
+
+1. People try to break automated systems all the time.
+   Filter out the posts with bad words in them, using
+   http://www.cs.cmu.edu/~biglou/resources/bad-words.txt, and delete
+   these posts.
+2. Store the posts that did not match the regex in Redis.
+   This way, we know what we missed and can reply to it manually.
+
 * Author - Vedang Manerikar
 
 * Contributors
