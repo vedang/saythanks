@@ -76,7 +76,7 @@
 
 (defn thank-you-person
   "Thank the person individually.
-  Like their post if it's bigger than 5 words :-D"
+  Like their post."
   [post]
   (let [thankee (:from post)
         thankyou-str (format (thank-you-msgs (rand-int msg-count))
