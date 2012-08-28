@@ -3,7 +3,8 @@
 * saythanks
 
 A Clojure library designed to thank people who wish you on Facebook on
-your birthday.
+your birthday. You can see an image of it in action here:
+http://imgur.com/w2xZl
 
 ** Pre-requisites
 
