@@ -31,6 +31,7 @@
 
 
 (def birthday-since-key "birthday.since")
+(def unmatched-posts-key "unmatched.posts")
 (def msg-count (count thank-you-msgs))
 (def facebook-graph-api-url "https://graph.facebook.com/")
 (def redis-server {:host "127.0.0.1" :port 6379})
@@ -130,6 +131,15 @@
 (defn say-thank-you
   "Say thank you to all the nice folk."
   [posts]
-  (let [filtered-posts (filter birthday-matcher posts)]
-    (println "posts matching birthday regex = " (count filtered-posts))
-    (dorun (map thank-you-person filtered-posts))))
+  (println "posts matching birthday regex = "
+           (count (filter birthday-matcher posts)))
+  (doseq [post posts]
+    (if (birthday-matcher post)
+      (thank-you-person post)
+      ;;If type status, then log this post for manual intervention
+      (when (and (= "status" (:type post))
+                 (seq (:message post)))
+        (redis (r/zadd unmatched-posts-key
+                       (datetime->unix-timestamp)
+                       (json/json-str
+                        (select-keys post [:id :from :message]))))))))
