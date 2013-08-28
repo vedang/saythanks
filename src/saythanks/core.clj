@@ -94,7 +94,10 @@
                              "/likes?"
                              (http/generate-query-string
                               {:access_token access-token}))]
-    (println thankyou-str)
+    (println (format "%s said: %s. I said: %s"
+                     (:name thankee)
+                     (:message post)
+                     thankyou-str))
     (http/post thanks-post-url)
     (http/post thanks-like-url)))
 
