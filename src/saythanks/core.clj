@@ -33,6 +33,7 @@
 
 (def birthday-since-key "birthday.since")
 (def unmatched-posts-key "unmatched.posts")
+(def interesting-posts-key "interesting.posts")
 (def msg-count (count thank-you-msgs))
 (def facebook-graph-api-url "https://graph.facebook.com/v2.1/")
 (def redis-server {:host "127.0.0.1" :port 6379})
@@ -76,6 +77,16 @@
         (redis (r/set birthday-since-key new-since))))))
 
 
+(defn- log-interesting-wish
+  "This person said something more than 'Happy Birthday, x'. Consider
+  thanking him/her manually."
+  [post]
+  (redis (r/zadd interesting-posts-key
+                 (datetime->unix-timestamp)
+                 (json/json-str
+                  (select-keys post [:id :from :message])))))
+
+
 (defn thank-you-person
   "Thank the person individually.
   Like their post."
@@ -99,6 +110,13 @@
                      (:name thankee)
                      (:message post)
                      thankyou-str))
+    (when (> (count (cs/split (cs/replace (:message post)
+                                          happy-birthday-regex
+                                          "")
+                              #"\s"))
+             5)
+      (println "Logging this person's post as interesting.")
+      (log-interesting-wish post))
     (http/post thanks-post-url)
     (http/post thanks-like-url)))
 
