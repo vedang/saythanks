@@ -3,9 +3,10 @@
   (:require [clj-http.client :as http]
             [clj-time.core :as time]
             [clojure.data.json :as json]
-            [carmine.core :as r])
-  (:use [saythanks.redis :only [init-redis! redis]]
-        [saythanks.access :only [access-token]])
+            [clojure.string :as cs]
+            [taoensso.carmine :as r]
+            [saythanks.redis :refer [init-redis! redis]]
+            [saythanks.access :refer [access-token]])
   (:import [org.joda.time DateTime]))
 
 
@@ -15,7 +16,7 @@
 ;; (def access-token "<your access token>")
 ;; Add your access token here.
 ;; Get it from https://developers.facebook.com/tools/explorer
-;; you need to give the read_stream and publish_stream permissions
+;; you need to give the read_stream and publish_actions permissions
 
 
 ;; Add as many messages as you want here, one will be
@@ -33,7 +34,7 @@
 (def birthday-since-key "birthday.since")
 (def unmatched-posts-key "unmatched.posts")
 (def msg-count (count thank-you-msgs))
-(def facebook-graph-api-url "https://graph.facebook.com/")
+(def facebook-graph-api-url "https://graph.facebook.com/v2.1/")
 (def redis-server {:host "127.0.0.1" :port 6379})
 ;; Regex contributed by Kiran Kulkarni (@kirankulkarni)
 (def happy-birthday-regex #"(?i)h?a+p+y(?:\s|.)*b?(?:irth|'| )?d+ay")
