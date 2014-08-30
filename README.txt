@@ -23,7 +23,8 @@ Add the following code to it:
 
 Add your access token here.
 Get it from https://developers.facebook.com/tools/explorer
-you need to give the read_stream and publish_stream permissions.
+you need to give the read_stream and publish_actions
+permissions. (under Extended Permissions)
 
 2. Change the default thank-you messages in src/saythanks/core.clj
 
@@ -34,7 +35,7 @@ facebook post.
 3. Go to the terminal and run:
 
     $ lein uberjar
-    $ java -jar ./target/saythanks-0.1.0-SNAPSHOT-standalone.jar
+    $ java -jar ./target/saythanks-0.2.0-standalone.jar
 
 Enjoy :)
 
@@ -56,6 +57,6 @@ Here are some TODO's I have in mind:
 
 * License
 
-Copyright © 2012 Vedang Manerikar
+Copyright © 2012, 2013, 2014 Vedang Manerikar
 
 Distributed under the Eclipse Public License, the same as Clojure.
