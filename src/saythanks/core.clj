@@ -16,7 +16,7 @@
 ;; (def access-token "<your access token>")
 ;; Add your access token here.
 ;; Get it from https://developers.facebook.com/tools/explorer
-;; you need to give the read_stream and publish_actions permissions
+;; you need to give the user_posts and publish_actions permissions
 
 
 ;; Add as many messages as you want here, one will be
@@ -32,11 +32,12 @@
 
 
 (def birthday-since-key "birthday.since")
+(def birthday-until-key "birthday.until")
 (def unmatched-posts-key "unmatched.posts")
 (def interesting-posts-key "interesting.posts")
 (def msg-count (count thank-you-msgs))
-(def facebook-graph-api-url "https://graph.facebook.com/v2.1/")
-(def redis-server {:host "127.0.0.1" :port 6379})
+(def facebook-graph-api-url "https://graph.facebook.com/v2.4/")
+(def redis-server {:host "192.168.33.20" :port 6379})
 ;; Regex contributed by Kiran Kulkarni (@kirankulkarni)
 (def happy-birthday-regex #"(?i)h?a+p+y(?:\s|.)*b?(?:irth|'| )?d+ay")
 
@@ -68,13 +69,18 @@
      (str (long (/ (.getMillis datetime) 1000)))))
 
 
-(defn update-since-token
-  "Update the since token from given url"
+(defn update-time-tokens
+  "Update the tokens from given url"
   [paging-url]
   (when paging-url
-    (when-let [token (first (re-seq #"since=[0-9]+" paging-url))]
-      (let [new-since (second (clojure.string/split token #"="))]
-        (redis (r/set birthday-since-key new-since))))))
+    (let [since-token (first (re-seq #"since=[0-9]+" paging-url))
+          new-since (when since-token
+                      (second (clojure.string/split since-token #"=")))
+          until-token (first (re-seq #"until=[0-9]+" paging-url))
+          new-until (when until-token
+                      (second (clojure.string/split until-token #"=")))]
+      (redis (r/set birthday-since-key new-since)
+             (r/set birthday-until-key new-until)))))
 
 
 (defn- log-interesting-wish
@@ -83,8 +89,7 @@
   [post]
   (redis (r/zadd interesting-posts-key
                  (datetime->unix-timestamp)
-                 (json/json-str
-                  (select-keys post [:id :from :message])))))
+                 (json/json-str post))))
 
 
 (defn thank-you-person
@@ -117,25 +122,31 @@
              5)
       (println "Logging this person's post as interesting.")
       (log-interesting-wish post))
-    (http/post thanks-post-url)
-    (http/post thanks-like-url)))
+    ;; (http/post thanks-post-url)
+    ;; (http/post thanks-like-url)
+    ))
 
 
 (defn birthday-matcher
   [post]
-  (when (:message post)
+  (when (and (= (:type post) "status")
+             (seq (:message post)))
     (re-seq happy-birthday-regex (:message post))))
 
 
 (defn poll-for-posts!
-  "Get posts from facebook. Update the since field so that we don't get
-  them again."
+  "Get posts from facebook. Update the since and until fields to used
+  time-based pagination of the feed."
   []
-  (let [since (or (redis (r/get birthday-since-key))
-                  (datetime->unix-timestamp (time/from-now (time/days -1))))
+  (let [since-time (or (redis (r/get birthday-since-key))
+                       (datetime->unix-timestamp (time/from-now (time/days -3))))
+        until-time (or (redis (r/get birthday-until-key))
+                       (datetime->unix-timestamp (time/now)))
         url-args {:access_token access-token
-                  :since since
-                  :limit 1000}
+                  :since since-time
+                  :until until-time
+                  :limit 10 ;; Max limit for v2.4 for the Facebook Graph API
+                  :fields "id,message,from,type,properties,status_type,story"}
         feed-url (str facebook-graph-api-url
                       "me/feed?"
                       (http/generate-query-string url-args))
@@ -144,8 +155,8 @@
                                    (:body feed-res)
                                    "{}"))
         feed-data (:data feed-res)]
-    (println "Fetched posts since : " since)
-    (update-since-token (get-in feed-res [:paging :previous]))
+    (println "Fetched posts since : " since-time " and until: " until-time)
+    (update-time-tokens (get-in feed-res [:paging :next]))
     (println "Data count = " (count feed-data))
     feed-data))
 
@@ -158,10 +169,7 @@
   (doseq [post posts]
     (if (birthday-matcher post)
       (thank-you-person post)
-      ;;If type status, then log this post for manual intervention
-      (when (and (= "status" (:type post))
-                 (seq (:message post)))
-        (redis (r/zadd unmatched-posts-key
-                       (datetime->unix-timestamp)
-                       (json/json-str
-                        (select-keys post [:id :from :message]))))))))
+      ;;Log this post for manual intervention
+      (redis (r/zadd unmatched-posts-key
+                     (datetime->unix-timestamp)
+                     (json/json-str post))))))

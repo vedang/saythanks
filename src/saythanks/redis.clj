@@ -8,9 +8,9 @@
 
 (defn init-redis!
   "Initialize Redis connection"
-  {:arglists '([{:keys [host port password timeout]}])}
+  {:arglists '([{:keys [host port]}])}
   [redis-server-spec]
-  (let [redis-server-conn {:pool {:max-active 8}
+  (let [redis-server-conn {:pool {:max-total-per-key 8}
                            :spec redis-server-spec}]
     (reset! server-conn redis-server-conn)))
 

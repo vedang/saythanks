@@ -3,8 +3,16 @@
 * saythanks
 
 A Clojure library designed to thank people who wish you on Facebook on
-your birthday. You can see an image of it in action here:
-http://imgur.com/w2xZl
+your birthday. You can see an image of it in action here: http://imgur.com/w2xZl
+
+*UPDATE*: The last time I ran this code successfully was in 2014.
+Facebook as since changed the way that they return birthday posts in
+the Graph API. We no longer have access to every individual post, we
+can only access the entire group of posts via the API (Eg: "Vedang and
+30 other friends have wished you on your Birthday"). Therefore it is
+no longer possible to reply to each individual post.
+
+Keeping the repo around for nostalgia :)
 
 ** Pre-requisites
 
@@ -14,19 +22,18 @@ continuously polling Facebook and reply to everyone who wishes us.
 
 ** Usage
 
-1. Create the file src/saythankyou/access.clj
+1. Create the file ~src/saythanks/access.clj~
 
 Add the following code to it:
 
-    (ns saythanks.access)
-    (def access-token "<your access token>")
+#+BEGIN_SRC clojure
+  (ns saythanks.access)
+  (def access-token "<your access token>")
+#+END_SRC
 
-Add your access token here.
-Get it from https://developers.facebook.com/tools/explorer
-you need to give the read_stream and publish_actions
-permissions. (under Extended Permissions)
+You can get your access-token from https://developers.facebook.com/tools/explorer. You need the ~user_posts~ (under User Data Permissions) and ~publish_actions~ (under Extended Permissions) permissions.
 
-2. Change the default thank-you messages in src/saythanks/core.clj
+2. Change the default thank-you messages in ~src/saythanks/core.clj~
 
 (If you wish, I think the defaults are quite good.)
 A thank-you message will be picked at random and used to reply to the
@@ -34,29 +41,20 @@ facebook post.
 
 3. Go to the terminal and run:
 
-    $ lein uberjar
-    $ java -jar ./target/saythanks-0.2.0-standalone.jar
+#+BEGIN_SRC shell
+  $ lein uberjar
+  $ java -jar ./target/saythanks-0.2.0-standalone.jar
+#+END_SRC
 
 Enjoy :)
-
-** Contribution
-
-Suggestions and pull requests are most welcome.
-
-Here are some TODO's I have in mind:
-
-1. People try to break automated systems all the time.
-   Filter out the posts with bad words in them, using
-   http://www.cs.cmu.edu/~biglou/resources/bad-words.txt, and delete
-   these posts.
 
 * Author - Vedang Manerikar
 
 * Contributors
- - Kiran Kulkarni: the awesome regex which is at the heart of the code.
+ - Kiran Kulkarni ([[https://twitter.com/kiran_kulkarni][@kiran_kulkarni]]): the awesome regex which is at the heart of the code.
 
 * License
 
-Copyright © 2012, 2013, 2014 Vedang Manerikar
+Copyright © 2012, 2013, 2014, 2015 Vedang Manerikar ([[https://twitter.com/vedang][@vedang]])
 
 Distributed under the Eclipse Public License, the same as Clojure.
